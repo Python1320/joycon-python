@@ -432,7 +432,27 @@ class JoyCon:
     def disconnect_device(self):
         self._write_output_report(b'\x01', b'\x06', b'\x00')
 
+    def _send_rumble(self,data=b'\x00\x00\x00\x00\x00\x00\x00\x00'):
+        self._RUMBLE_DATA = data
+        self._write_output_report(b'\x10', b'', b'')
+        
+    def enable_vibration(self,enable=True):
+        """Sends enable or disable command for vibration. Seems to do nothing."""
+        self._write_output_report(b'\x01', b'\x48', b'\x01' if enable else b'\x00')
+        
+    def rumble_simple(self):
+        """Rumble for approximately 1.5 seconds (why?). Repeat sending to keep rumbling."""
+        self._send_rumble(b'\x98\x1e\xc6\x47\x98\x1e\xc6\x47')
+        
+    def rumble_stop(self):
+        """Instantly stops the rumble"""
+        self._send_rumble()
 
+    def connected(self):
+        """Are we still connected to the joycon?"""
+        return self._update_input_report_thread.is_alive()
+
+	
 if __name__ == '__main__':
     import pyjoycon.device as d
     ids = d.get_L_id() if None not in d.get_L_id() else d.get_R_id()
